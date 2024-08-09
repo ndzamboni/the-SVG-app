@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import GradientEditor from './GradientEditor';
 
 const ShapeControls = ({ addLayer }) => {
   const [shape, setShape] = useState('rectangle');
@@ -14,6 +15,10 @@ const ShapeControls = ({ addLayer }) => {
     borderRadius: 0,
     gradient: null,
   });
+
+  const handleGradientChange = (gradient) => {
+    setAttributes({ ...attributes, gradient });
+  };
 
   const handleAddLayer = () => {
     addLayer(shape, attributes);
@@ -92,6 +97,8 @@ const ShapeControls = ({ addLayer }) => {
         />
       </label>
 
+      <GradientEditor onGradientChange={handleGradientChange} />
+
       <label>
         Stroke Color:
         <input
@@ -123,8 +130,7 @@ const ShapeControls = ({ addLayer }) => {
           min="0"
           value={attributes.fillOpacity}
           onChange={(e) =>
-            setAttributes({ ...attributes, fillOpacity: +e.target.value })
-          }
+            setAttributes({ ...attributes, fillOpacity: +e.target.value })}
         />
       </label>
 
@@ -137,12 +143,9 @@ const ShapeControls = ({ addLayer }) => {
           min="0"
           value={attributes.strokeOpacity}
           onChange={(e) =>
-            setAttributes({ ...attributes, strokeOpacity: +e.target.value })
-          }
+            setAttributes({ ...attributes, strokeOpacity: +e.target.value })}
         />
       </label>
-
-      {/* Future Implementation: Gradient Controls */}
 
       <button onClick={handleAddLayer}>Add Shape</button>
     </div>
