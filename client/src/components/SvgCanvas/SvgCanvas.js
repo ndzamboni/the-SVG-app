@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import ShapeControls from './ShapeControls';
+import PathControls from './PathControls';
+import TextControls from './TextControls';
 import LayerManager from './LayerManager';
 import TransformationControls from './TransformationControls';
 import { saveSVG } from './SvgUtils';
@@ -31,12 +33,12 @@ const SvgCanvas = () => {
           .attr('y', attributes.y)
           .attr('width', attributes.width)
           .attr('height', attributes.height)
-          .attr('rx', attributes.borderRadius) // Border radius
+          .attr('rx', attributes.borderRadius)
           .attr('fill', attributes.fill)
-          .attr('fill-opacity', attributes.fillOpacity) // Fill opacity
+          .attr('fill-opacity', attributes.fillOpacity)
           .attr('stroke', attributes.stroke)
-          .attr('stroke-width', attributes.strokeWidth) // Stroke width
-          .attr('stroke-opacity', attributes.strokeOpacity); // Stroke opacity
+          .attr('stroke-width', attributes.strokeWidth)
+          .attr('stroke-opacity', attributes.strokeOpacity);
       } else if (type === 'circle') {
         element = svg.append('circle')
           .attr('cx', attributes.x)
@@ -58,6 +60,20 @@ const SvgCanvas = () => {
           .attr('stroke', attributes.stroke)
           .attr('stroke-width', attributes.strokeWidth)
           .attr('stroke-opacity', attributes.strokeOpacity);
+      } else if (type === 'path') {
+        element = svg.append('path')
+          .attr('d', attributes.d)
+          .attr('fill', attributes.fill)
+          .attr('stroke', attributes.stroke)
+          .attr('stroke-width', attributes.strokeWidth);
+      } else if (type === 'text') {
+        element = svg.append('text')
+          .attr('x', attributes.x)
+          .attr('y', attributes.y)
+          .attr('font-size', attributes.fontSize)
+          .attr('font-family', attributes.fontFamily)
+          .attr('fill', attributes.fill)
+          .text(attributes.text);
       }
 
       d3.drag().on('drag', function (event) {
@@ -79,8 +95,8 @@ const SvgCanvas = () => {
         type,
         attributes: {
           ...attributes,
-          x: 50,
-          y: 50,
+          x: type === 'text' || type === 'path' ? 100 : 50,
+          y: type === 'text' || type === 'path' ? 100 : 50,
         },
         visible: true,
       },
@@ -99,6 +115,8 @@ const SvgCanvas = () => {
     <div>
       <svg ref={svgRef}></svg>
       <ShapeControls addLayer={addLayer} />
+      <PathControls addLayer={addLayer} />
+      <TextControls addLayer={addLayer} />
       <LayerManager layers={layers} toggleVisibility={toggleVisibility} />
       {selectedLayer && (
         <TransformationControls
