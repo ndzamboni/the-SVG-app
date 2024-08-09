@@ -1,19 +1,15 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
+import ShapeControls from './ShapeControls';
+import LayerManager from './LayerManager';
+import TransformationControls from './TransformationControls';
+import { saveSVG } from './SvgUtils';
 import './SvgCanvas.css';
 
 const SvgCanvas = () => {
   const svgRef = useRef();
-
-  // State for rectangle attributes
-  const [rect, setRect] = useState({
-    x: 100,
-    y: 100,
-    width: 200,
-    height: 100,
-    fill: 'blue',
-    stroke: 'none',
-  });
+  const [layers, setLayers] = useState([]);
+  const [selectedLayer, setSelectedLayer] = useState(null);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current)
@@ -21,72 +17,96 @@ const SvgCanvas = () => {
       .attr('height', 600)
       .style('border', '1px solid black');
 
-    // Clear the previous SVG content
     svg.selectAll('*').remove();
 
-    // Append a rectangle based on the state
-    svg.append('rect')
-      .attr('x', rect.x)
-      .attr('y', rect.y)
-      .attr('width', rect.width)
-      .attr('height', rect.height)
-      .attr('fill', rect.fill)
-      .attr('stroke', rect.stroke);
-  }, [rect]);
+    layers.forEach(layer => {
+      if (!layer.visible) return;
+
+      const { type, attributes } = layer;
+      let element;
+
+      if (type === 'rectangle') {
+        element = svg.append('rect')
+          .attr('x', attributes.x)
+          .attr('y', attributes.y)
+          .attr('width', attributes.width)
+          .attr('height', attributes.height)
+          .attr('rx', attributes.borderRadius) // Border radius
+          .attr('fill', attributes.fill)
+          .attr('fill-opacity', attributes.fillOpacity) // Fill opacity
+          .attr('stroke', attributes.stroke)
+          .attr('stroke-width', attributes.strokeWidth) // Stroke width
+          .attr('stroke-opacity', attributes.strokeOpacity); // Stroke opacity
+      } else if (type === 'circle') {
+        element = svg.append('circle')
+          .attr('cx', attributes.x)
+          .attr('cy', attributes.y)
+          .attr('r', attributes.radius)
+          .attr('fill', attributes.fill)
+          .attr('fill-opacity', attributes.fillOpacity)
+          .attr('stroke', attributes.stroke)
+          .attr('stroke-width', attributes.strokeWidth)
+          .attr('stroke-opacity', attributes.strokeOpacity);
+      } else if (type === 'ellipse') {
+        element = svg.append('ellipse')
+          .attr('cx', attributes.x)
+          .attr('cy', attributes.y)
+          .attr('rx', attributes.width / 2)
+          .attr('ry', attributes.height / 2)
+          .attr('fill', attributes.fill)
+          .attr('fill-opacity', attributes.fillOpacity)
+          .attr('stroke', attributes.stroke)
+          .attr('stroke-width', attributes.strokeWidth)
+          .attr('stroke-opacity', attributes.strokeOpacity);
+      }
+
+      d3.drag().on('drag', function (event) {
+        const [x, y] = d3.pointer(event);
+        updateLayer(layer.id, { ...attributes, x, y });
+      })(element);
+
+      element.on('click', () => {
+        setSelectedLayer(layer.id);
+      });
+    });
+  }, [layers]);
+
+  const addLayer = (type, attributes) => {
+    setLayers([
+      ...layers,
+      {
+        id: layers.length + 1,
+        type,
+        attributes: {
+          ...attributes,
+          x: 50,
+          y: 50,
+        },
+        visible: true,
+      },
+    ]);
+  };
+
+  const updateLayer = (id, newAttributes) => {
+    setLayers(layers.map(layer => layer.id === id ? { ...layer, attributes: newAttributes } : layer));
+  };
+
+  const toggleVisibility = (id) => {
+    setLayers(layers.map(layer => layer.id === id ? { ...layer, visible: !layer.visible } : layer));
+  };
 
   return (
     <div>
       <svg ref={svgRef}></svg>
-      <div className="controls">
-        <label>
-          X:
-          <input
-            type="number"
-            value={rect.x}
-            onChange={(e) => setRect({ ...rect, x: +e.target.value })}
-          />
-        </label>
-        <label>
-          Y:
-          <input
-            type="number"
-            value={rect.y}
-            onChange={(e) => setRect({ ...rect, y: +e.target.value })}
-          />
-        </label>
-        <label>
-          Width:
-          <input
-            type="number"
-            value={rect.width}
-            onChange={(e) => setRect({ ...rect, width: +e.target.value })}
-          />
-        </label>
-        <label>
-          Height:
-          <input
-            type="number"
-            value={rect.height}
-            onChange={(e) => setRect({ ...rect, height: +e.target.value })}
-          />
-        </label>
-        <label>
-          Fill Color:
-          <input
-            type="color"
-            value={rect.fill}
-            onChange={(e) => setRect({ ...rect, fill: e.target.value })}
-          />
-        </label>
-        <label>
-          Stroke Color:
-          <input
-            type="color"
-            value={rect.stroke}
-            onChange={(e) => setRect({ ...rect, stroke: e.target.value })}
-          />
-        </label>
-      </div>
+      <ShapeControls addLayer={addLayer} />
+      <LayerManager layers={layers} toggleVisibility={toggleVisibility} />
+      {selectedLayer && (
+        <TransformationControls
+          layer={layers.find(layer => layer.id === selectedLayer)}
+          updateLayer={updateLayer}
+        />
+      )}
+      <button onClick={() => saveSVG(svgRef.current)}>Save SVG</button>
     </div>
   );
 };
