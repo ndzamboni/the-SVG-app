@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
+import Sidebar from './Sidebar';
 import ShapeControls from './ShapeControls';
 import PathControls from './PathControls';
 import TextControls from './TextControls';
@@ -17,7 +18,7 @@ const SvgCanvas = () => {
     const svg = d3.select(svgRef.current)
       .attr('width', 800)
       .attr('height', 600)
-      .style('border', '1px solid black');
+      .style('border', '1px solid #444');
 
     svg.selectAll('*').remove();
 
@@ -112,19 +113,23 @@ const SvgCanvas = () => {
   };
 
   return (
-    <div>
-      <svg ref={svgRef}></svg>
-      <ShapeControls addLayer={addLayer} />
-      <PathControls addLayer={addLayer} />
-      <TextControls addLayer={addLayer} />
-      <LayerManager layers={layers} toggleVisibility={toggleVisibility} />
-      {selectedLayer && (
-        <TransformationControls
-          layer={layers.find(layer => layer.id === selectedLayer)}
-          updateLayer={updateLayer}
-        />
-      )}
-      <button onClick={() => saveSVG(svgRef.current)}>Save SVG</button>
+    <div className="svg-canvas-container">
+      <Sidebar>
+        <ShapeControls addLayer={addLayer} />
+        <PathControls addLayer={addLayer} />
+        <TextControls addLayer={addLayer} />
+        <LayerManager layers={layers} toggleVisibility={toggleVisibility} />
+        {selectedLayer && (
+          <TransformationControls
+            layer={layers.find(layer => layer.id === selectedLayer)}
+            updateLayer={updateLayer}
+          />
+        )}
+        <button onClick={() => saveSVG(svgRef.current)}>Save SVG</button>
+      </Sidebar>
+      <div className="svg-container">
+        <svg ref={svgRef}></svg>
+      </div>
     </div>
   );
 };
