@@ -77,14 +77,41 @@ const SvgCanvas = () => {
           .text(attributes.text);
       }
 
-      d3.drag().on('drag', function (event) {
-        const [x, y] = d3.pointer(event);
-        updateLayer(layer.id, { ...attributes, x, y });
-      })(element);
+      let startX, startY, initialX, initialY;
 
-      element.on('click', () => {
-        setSelectedLayer(layer.id);
-      });
+      const drag = d3.drag()
+        .on('start', function (event) {
+          // Capture the starting mouse position
+          startX = event.x;
+          startY = event.y;
+
+          // Capture the initial position of the element
+          const { x, y } = layer.type === 'circle' || layer.type === 'ellipse'
+            ? { x: attributes.cx, y: attributes.cy }
+            : { x: attributes.x, y: attributes.y };
+
+          initialX = x;
+          initialY = y;
+        })
+        .on('drag', function (event) {
+          // Calculate the new position
+          const dx = event.x - startX;
+          const dy = event.y - startY;
+
+          const newX = initialX + dx;
+          const newY = initialY + dy;
+
+          // Update the element's position
+          updateLayer(layer.id, {
+            ...attributes,
+            x: newX,
+            y: newY,
+            ...(layer.type === 'circle' || layer.type === 'ellipse' ? { cx: newX, cy: newY } : {}),
+          });
+        });
+
+      drag(element);
+      element.on('click', () => setSelectedLayer(layer.id));
     });
   }, [layers]);
 
