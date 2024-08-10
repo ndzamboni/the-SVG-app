@@ -6,7 +6,9 @@ import PathControls from './PathControls';
 import TextControls from './TextControls';
 import LayerManager from './LayerManager';
 import TransformationControls from './TransformationControls';
-import { saveSVG } from './SvgUtils';
+import FreehandDrawing from './FreehandDrawing';
+import PolygonDrawing from './PolygonDrawing';
+import ExportControls from './ExportControls';
 import './SvgCanvas.css';
 
 const SvgCanvas = () => {
@@ -35,7 +37,7 @@ const SvgCanvas = () => {
           .attr('width', attributes.width)
           .attr('height', attributes.height)
           .attr('rx', attributes.borderRadius)
-          .attr('fill', attributes.fill)
+          .attr('fill', attributes.gradient ? attributes.gradient : attributes.fill)
           .attr('fill-opacity', attributes.fillOpacity)
           .attr('stroke', attributes.stroke)
           .attr('stroke-width', attributes.strokeWidth)
@@ -45,7 +47,7 @@ const SvgCanvas = () => {
           .attr('cx', attributes.x)
           .attr('cy', attributes.y)
           .attr('r', attributes.radius)
-          .attr('fill', attributes.fill)
+          .attr('fill', attributes.gradient ? attributes.gradient : attributes.fill)
           .attr('fill-opacity', attributes.fillOpacity)
           .attr('stroke', attributes.stroke)
           .attr('stroke-width', attributes.strokeWidth)
@@ -56,7 +58,7 @@ const SvgCanvas = () => {
           .attr('cy', attributes.y)
           .attr('rx', attributes.width / 2)
           .attr('ry', attributes.height / 2)
-          .attr('fill', attributes.fill)
+          .attr('fill', attributes.gradient ? attributes.gradient : attributes.fill)
           .attr('fill-opacity', attributes.fillOpacity)
           .attr('stroke', attributes.stroke)
           .attr('stroke-width', attributes.strokeWidth)
@@ -64,6 +66,12 @@ const SvgCanvas = () => {
       } else if (type === 'path') {
         element = svg.append('path')
           .attr('d', attributes.d)
+          .attr('fill', attributes.fill)
+          .attr('stroke', attributes.stroke)
+          .attr('stroke-width', attributes.strokeWidth);
+      } else if (type === 'polygon') {
+        element = svg.append('polygon')
+          .attr('points', attributes.points)
           .attr('fill', attributes.fill)
           .attr('stroke', attributes.stroke)
           .attr('stroke-width', attributes.strokeWidth);
@@ -152,10 +160,12 @@ const SvgCanvas = () => {
             updateLayer={updateLayer}
           />
         )}
-        <button onClick={() => saveSVG(svgRef.current)}>Save SVG</button>
+        <ExportControls svgRef={svgRef} />
       </Sidebar>
       <div className="svg-container">
         <svg ref={svgRef}></svg>
+        <FreehandDrawing addLayer={addLayer} />
+        <PolygonDrawing addLayer={addLayer} />
       </div>
     </div>
   );
