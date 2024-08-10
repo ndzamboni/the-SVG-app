@@ -1,55 +1,46 @@
 import React, { useState } from 'react';
 
 const GradientEditor = ({ onGradientChange }) => {
-  const [type, setType] = useState('linear');
-  const [colors, setColors] = useState([{ color: '#ff0000', offset: 0 }, { color: '#0000ff', offset: 100 }]);
+  const [stops, setStops] = useState([
+    { offset: '0%', color: '#ff0000' },
+    { offset: '100%', color: '#0000ff' },
+  ]);
 
-  const handleColorChange = (index, newColor) => {
-    const newColors = [...colors];
-    newColors[index].color = newColor;
-    setColors(newColors);
-    onGradientChange({ type, colors: newColors });
+  const handleAddStop = () => {
+    setStops([...stops, { offset: '50%', color: '#00ff00' }]);
   };
 
-  const handleOffsetChange = (index, newOffset) => {
-    const newColors = [...colors];
-    newColors[index].offset = newOffset;
-    setColors(newColors);
-    onGradientChange({ type, colors: newColors });
+  const handleRemoveStop = (index) => {
+    setStops(stops.filter((_, i) => i !== index));
   };
 
-  const addColorStop = () => {
-    setColors([...colors, { color: '#ffffff', offset: 50 }]);
+  const handleChange = (index, field, value) => {
+    const newStops = stops.map((stop, i) =>
+      i === index ? { ...stop, [field]: value } : stop
+    );
+    setStops(newStops);
+    onGradientChange(`linear-gradient(${newStops.map(s => `${s.color} ${s.offset}`).join(', ')})`);
   };
 
   return (
     <div className="gradient-editor">
-      <label>
-        Type:
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="linear">Linear</option>
-          <option value="radial">Radial</option>
-        </select>
-      </label>
-
-      {colors.map((colorStop, index) => (
-        <div key={index}>
+      <h3>Gradient Editor</h3>
+      {stops.map((stop, index) => (
+        <div key={index} className="gradient-stop">
           <input
             type="color"
-            value={colorStop.color}
-            onChange={(e) => handleColorChange(index, e.target.value)}
+            value={stop.color}
+            onChange={(e) => handleChange(index, 'color', e.target.value)}
           />
           <input
-            type="number"
-            value={colorStop.offset}
-            min="0"
-            max="100"
-            onChange={(e) => handleOffsetChange(index, e.target.value)}
+            type="text"
+            value={stop.offset}
+            onChange={(e) => handleChange(index, 'offset', e.target.value)}
           />
+          <button onClick={() => handleRemoveStop(index)}>Remove</button>
         </div>
       ))}
-
-      <button onClick={addColorStop}>Add Color Stop</button>
+      <button onClick={handleAddStop}>Add Stop</button>
     </div>
   );
 };

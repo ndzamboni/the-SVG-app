@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Tooltip.css'; // Import the tooltip styles
 
 const PathControls = ({ addLayer }) => {
   const [points, setPoints] = useState([]);
@@ -24,7 +25,7 @@ const PathControls = ({ addLayer }) => {
     <div className="controls">
       <label>Path Points:</label>
       {points.map((point, index) => (
-        <div key={index}>
+        <div key={index} className="tooltip">
           <label>X:</label>
           <input
             type="number"
@@ -37,22 +38,35 @@ const PathControls = ({ addLayer }) => {
             value={point.y}
             onChange={(e) => handleUpdatePoint(index, 'y', +e.target.value)}
           />
+          <span className="tooltiptext">Modify the X and Y coordinates of this point.</span>
         </div>
       ))}
-      <button onClick={handleAddPoint}>Add Point</button>
-      <label>Stroke Color:</label>
-      <input
-        type="color"
-        value={stroke}
-        onChange={(e) => setStroke(e.target.value)}
-      />
-      <label>Fill Color:</label>
-      <input
-        type="color"
-        value={fill}
-        onChange={(e) => setFill(e.target.value)}
-      />
-      <button onClick={handleAddPath}>Add Path</button>
+      <div className="tooltip">
+        <button onClick={handleAddPoint}>Add Point</button>
+        <span className="tooltiptext">Click to add a new point to the path.</span>
+      </div>
+      <div className="tooltip">
+        <label>Stroke Color:</label>
+        <input
+          type="color"
+          value={stroke}
+          onChange={(e) => setStroke(e.target.value)}
+        />
+        <span className="tooltiptext">Select the stroke color for the path.</span>
+      </div>
+      <div className="tooltip">
+        <label>Fill Color:</label>
+        <input
+          type="color"
+          value={fill}
+          onChange={(e) => setFill(e.target.value)}
+        />
+        <span className="tooltiptext">Select the fill color for the path. Use 'none' for no fill.</span>
+      </div>
+      <div className="tooltip">
+        <button onClick={handleAddPath}>Add Path</button>
+        <span className="tooltiptext">Click to add the path to the canvas with the specified points and colors.</span>
+      </div>
     </div>
   );
 };

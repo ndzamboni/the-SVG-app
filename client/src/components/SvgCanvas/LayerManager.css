@@ -1,0 +1,25 @@
+.layer-manager {
+    color: #e5e5e5;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .layer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #444;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .layer:hover {
+    background-color: #555;
+  }
+  
+  .layer span {
+    margin-right: 10px;
+  }
+  
